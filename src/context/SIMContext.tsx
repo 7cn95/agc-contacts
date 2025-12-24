@@ -114,36 +114,35 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const billAmount = card.billAmount || 0;
         let totalFunds = paymentAmount + (card.creditBalance || 0);
 
-        if (totalFunds < billAmount) return; // Insufficient funds
-
-        // Logic (Same as before)
-        const previousExpiry = card.expirationDate || new Date().toISOString();
-        const transactionDate = new Date().toISOString();
-        let currentExp = new Date(card.expirationDate || Date.now());
-        if (currentExp < new Date()) currentExp = new Date();
-
-        while (totalFunds >= billAmount && billAmount > 0) {
-            totalFunds -= billAmount;
-            currentExp.setDate(currentExp.getDate() + 30);
+        if (totalFunds < billAmount) {
+            alert(`رصيد غير كافي. المطلوب: ${billAmount}، المتوفر: ${totalFunds}`);
+            return;
         }
 
+        // Logic: Renew for 1 MONTH ONLY per action (to avoid burning all credit)
+        // User can click again if they want more, or we can add "Months" selector later.
+
+        const now = new Date();
+        let currentExp = new Date(card.expirationDate || now);
+        // If expired, start count from TODAY
+        if (currentExp < now) currentExp = now;
+
+        // Add 30 Days
+        currentExp.setDate(currentExp.getDate() + 30);
         const newExpiry = currentExp.toISOString();
 
-        // 1. Create Renewal Record using Supabase
-        // Note: Our SQL Schema might need slight adjustment if we want to store ALL fields.
-        // My previous schema included: amountPaid, transactionDate, paymentMethod, receiptNumber, newExpiry, employeeName.
-        // It did NOT include 'billAmount' or 'previousExpiry'. I should probably add them to SQL if I want them, but for now I will stick to what the schema supports to avoid errors.
-        // Or I can update the schema.
+        // Calculate remaining credit
+        const remainingCredit = totalFunds - billAmount;
+        const transactionDate = new Date().toISOString();
 
-        // Actually, let's just insert what we have in the schema.
+        // 1. Create Renewal Record using Supabase
         const { error: historyError, data: historyData } = await supabase.from('renewal_history').insert([{
             simCardId: card.id,
             employeeName: card.employeeName,
-            amountPaid: paymentAmount,
+            amountPaid: billAmount, // We record the COST of the renewal, not necessarily the paymentAmount (which might be 0 if using credit)
             transactionDate,
-            renewalDate: transactionDate, // Fix: Add required field
+            renewalDate: transactionDate,
             newExpiry,
-            // previousExpiry // Schema doesn't have it, ignoring
         }]).select().single();
 
         if (historyError) {
@@ -153,33 +152,24 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         if (historyData) {
-            // We need to map it to RenewalRecord type locally if it differs, but for now assuming direct mapping
-            // setRenewalHistory(prev => [historyData, ...prev]); 
-            // We'll just fetch or add manually. The Type RenewalRecord expects some fields.
-            // Let's just do a refresh or manual add.
             const localRecord: RenewalRecord = {
                 id: historyData.id,
                 simCardId: historyData.simCardId,
                 employeeName: historyData.employeeName,
-                // ... map other fields
                 amountPaid: historyData.amountPaid,
                 transactionDate: historyData.transactionDate,
                 newExpiry: historyData.newExpiry,
-                previousExpiry: previousExpiry, // Local only for now since DB column missing
-                billAmount: billAmount // Local only
+                previousExpiry: card.expirationDate || new Date().toISOString(),
+                billAmount: billAmount
             };
             setRenewalHistory(prev => [localRecord, ...prev]);
         }
 
-        // 2. Update SIM Card
+        // 2. Update SIM Card (Status, Expiry, AND Credit Balance)
         const simUpdates: Partial<SIMCard> = {
             expirationDate: newExpiry,
             status: 'Active',
-            // renewalFlag: true, // Not in schema, ignore
-            // creditBalance: totalFunds // Not in schema! We need to handle credit balance? 
-            // The schema I wrote didn't have creditBalance. I should add it or ignore it.
-            // For now, I will ignore storing creditBalance in DB to avoid errors, 
-            // BUT this means credit won't persist. This is a trade-off.
+            creditBalance: remainingCredit // PERSIST NEW BALANCE
         };
 
         await updateSIMCard(id, simUpdates);
