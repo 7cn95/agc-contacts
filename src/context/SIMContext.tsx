@@ -10,12 +10,11 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [walletDeposits, setWalletDeposits] = useState<WalletDeposit[]>([]);
     const [externalExpenses, setExternalExpenses] = useState<ExternalExpense[]>([]);
     const [role, setRole] = useState<UserRole>('guest');
-    const [isLoading, setIsLoading] = useState(true);
+
 
     // Initial Data Fetch
     useEffect(() => {
         const fetchData = async () => {
-            setIsLoading(true);
             try {
                 const [simRes, renewRes, walletRes, expenseRes] = await Promise.all([
                     supabase.from('sim_cards').select('*'),
@@ -31,8 +30,6 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
             } catch (error) {
                 console.error('Error fetching data:', error);
-            } finally {
-                setIsLoading(false);
             }
         };
 
@@ -125,19 +122,7 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         const newExpiry = currentExp.toISOString();
 
-        // 1. Create Renewal Record
-        const record = {
-            simCardId: card.id,
-            employeeName: card.employeeName,
-            amountPaid: paymentAmount,
-            // billAmount is not in our simplified schema but useful if we added it, skipping for now based on sql schema
-            transactionDate,
-            // previousExpiry,
-            newExpiry,
-            paymentMethod: 'Cash',
-            receiptNumber: `REC-${Date.now()}` // Mock receipt
-        };
-
+        // 1. Create Renewal Record using Supabase
         // Note: Our SQL Schema might need slight adjustment if we want to store ALL fields.
         // My previous schema included: amountPaid, transactionDate, paymentMethod, receiptNumber, newExpiry, employeeName.
         // It did NOT include 'billAmount' or 'previousExpiry'. I should probably add them to SQL if I want them, but for now I will stick to what the schema supports to avoid errors.
