@@ -9,7 +9,13 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [renewalHistory, setRenewalHistory] = useState<RenewalRecord[]>([]);
     const [walletDeposits, setWalletDeposits] = useState<WalletDeposit[]>([]);
     const [externalExpenses, setExternalExpenses] = useState<ExternalExpense[]>([]);
-    const [role, setRole] = useState<UserRole>('guest');
+    const [role, setRole] = useState<UserRole>(() => {
+        return (localStorage.getItem('user_role') as UserRole) || 'guest';
+    });
+
+    useEffect(() => {
+        localStorage.setItem('user_role', role);
+    }, [role]);
 
 
     // Initial Data Fetch
@@ -46,6 +52,7 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const { data, error } = await supabase.from('wallet_deposits').insert([deposit]).select().single();
         if (error) {
             console.error('Error adding deposit:', error);
+            alert('Error adding fund: ' + error.message);
             return;
         }
         if (data) setWalletDeposits(prev => [data, ...prev]);
@@ -140,6 +147,7 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (historyError) {
             console.error('Error logging renewal:', historyError);
+            alert('Error renewing: ' + historyError.message);
             return;
         }
 
