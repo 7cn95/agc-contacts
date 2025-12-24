@@ -29,7 +29,21 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     supabase.from('external_expenses').select('*')
                 ]);
 
-                if (simRes.data) setSimCards(simRes.data);
+                if (simRes.data) {
+                    const mappedCards: SIMCard[] = simRes.data.map((d: any) => ({
+                        id: d.id,
+                        employeeName: d.employeeName,
+                        phoneNumber: d.phoneNumber,
+                        jobTitle: d.position,           // Map DB 'position' -> Local 'jobTitle'
+                        workLocation: d.department,     // Map DB 'department' -> Local 'workLocation'
+                        billAmount: d.billAmount,
+                        status: d.status,
+                        expirationDate: d.expirationDate,
+                        renewalFlag: false,             // Default
+                        creditBalance: d.creditBalance || 0
+                    }));
+                    setSimCards(mappedCards);
+                }
                 if (renewRes.data) setRenewalHistory(renewRes.data);
                 if (walletRes.data) setWalletDeposits(walletRes.data);
                 if (expenseRes.data) setExternalExpenses(expenseRes.data);
