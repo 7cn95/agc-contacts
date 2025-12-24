@@ -141,6 +141,7 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             employeeName: card.employeeName,
             amountPaid: paymentAmount,
             transactionDate,
+            renewalDate: transactionDate, // Fix: Add required field
             newExpiry,
             // previousExpiry // Schema doesn't have it, ignoring
         }]).select().single();
