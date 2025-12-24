@@ -191,18 +191,52 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await updateSIMCard(id, simUpdates);
     };
 
-    const importSIMCards = async (newCards: SIMCard[]) => {
-        // Remove IDs to let DB generate them
-        const cardsToInsert = newCards.map(({ id, ...rest }) => rest);
+    const importSIMCards = async (newCards: SIMCard[]): Promise<boolean> => {
+        // Map SIMCard type to DB Schema
+        // DB Columns: phoneNumber, employeeName, position, department, billAmount, expirationDate, status, company (optional)
+
+        const cardsToInsert = newCards.map(card => ({
+            phoneNumber: card.phoneNumber,
+            employeeName: card.employeeName,
+            position: card.jobTitle,      // Mapping jobTitle -> position
+            department: card.workLocation,// Mapping workLocation -> department
+            billAmount: card.billAmount,
+            expirationDate: card.expirationDate,
+            status: card.status,
+            // serialNumber, provider, planType, company are optional/missing in CSV context
+            // renewalFlag, creditBalance are NOT in DB, so we exclude them
+        }));
 
         const { data, error } = await supabase.from('sim_cards').insert(cardsToInsert).select();
+
         if (error) {
             console.error('Error importing cards:', error);
-            return;
+            // alert('Error importing: ' + error.message); // Caller should handle UI
+            return false;
         }
+
         if (data) {
-            setSimCards(prev => [...prev, ...data]);
+            // We need to map back from DB result (if keys differ) to local State
+            // But since local state uses local types, and data returns DB cols...
+            // better to construct local objects properly or fetch fresh.
+            // For now, let's map DB result back to SIMCard
+            const importedCards: SIMCard[] = data.map(d => ({
+                id: d.id,
+                employeeName: d.employeeName,
+                phoneNumber: d.phoneNumber,
+                jobTitle: d.position,           // Map back
+                workLocation: d.department,     // Map back
+                billAmount: d.billAmount,
+                status: d.status,
+                expirationDate: d.expirationDate,
+                renewalFlag: false,             // Default
+                creditBalance: 0                // Default
+            }));
+
+            setSimCards(prev => [...prev, ...importedCards]);
+            return true;
         }
+        return false;
     };
 
     return (

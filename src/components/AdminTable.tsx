@@ -41,7 +41,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             const text = e.target?.result as string;
             if (!text) return;
 
@@ -102,14 +102,18 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
             });
 
             if (newCards.length > 0) {
-                importSIMCards(newCards);
-                alert(`Successfully imported ${newCards.length} lines`);
+                const success = await importSIMCards(newCards);
+                if (success) {
+                    alert(`Successfully imported ${newCards.length} lines`);
+                    // Reset input
+                    if (event.target) event.target.value = '';
+                } else {
+                    alert('Failed to import lines. creating Check console for details.');
+                }
             } else {
                 alert('No valid lines found or header mismatch. Please check the CSV format.');
+                if (event.target) event.target.value = '';
             }
-
-            // Reset input
-            event.target.value = '';
         };
         reader.readAsText(file);
     };

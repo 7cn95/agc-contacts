@@ -52,6 +52,6 @@ export interface SIMContextType {
   renewSIMCard: (id: string, paymentAmount: number) => void;
   addDeposit: (amount: number, note?: string) => void;
   addExternalExpense: (amount: number, description: string, phoneNumber?: string) => void;
-  importSIMCards: (cards: SIMCard[]) => void;
+  importSIMCards: (cards: SIMCard[]) => Promise<boolean>;
   setRole: (role: UserRole) => void; // For switching views
 }
