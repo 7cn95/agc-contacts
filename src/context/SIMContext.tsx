@@ -197,8 +197,9 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             billAmount: card.billAmount,
             expirationDate: card.expirationDate,
             status: card.status,
+            creditBalance: card.creditBalance,
             // serialNumber, provider, planType, company are optional/missing in CSV context
-            // renewalFlag, creditBalance are NOT in DB, so we exclude them
+            // renewalFlag are NOT in DB, so we exclude them
         }));
 
         const { data, error } = await supabase.from('sim_cards').insert(cardsToInsert).select();
@@ -224,7 +225,7 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 status: d.status,
                 expirationDate: d.expirationDate,
                 renewalFlag: false,             // Default
-                creditBalance: 0                // Default
+                creditBalance: d.creditBalance  // Map back
             }));
 
             setSimCards(prev => [...prev, ...importedCards]);
