@@ -6,14 +6,16 @@ export const GuestTable: React.FC = () => {
     const { simCards } = useSIM();
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredCards = simCards.filter((card) => {
-        const dateStr = card.expirationDate ? new Date(card.expirationDate).toLocaleDateString('ar-IQ') : '';
-        return card.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (card.jobTitle || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (card.workLocation || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            dateStr.includes(searchTerm) ||
-            card.phoneNumber.includes(searchTerm);
-    });
+    const filteredCards = simCards
+        .filter((card) => {
+            const dateStr = card.expirationDate ? new Date(card.expirationDate).toLocaleDateString('ar-IQ') : '';
+            return card.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (card.jobTitle || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (card.workLocation || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                dateStr.includes(searchTerm) ||
+                card.phoneNumber.includes(searchTerm);
+        })
+        .sort((a, b) => a.employeeName.localeCompare(b.employeeName, 'ar'));
 
     return (
         <div className="space-y-6">
