@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSIM } from '../context/SIMContext';
 import { LoginModal } from './LoginModal';
 import logo from '../assets/logo.png';
-import { Smartphone, LogOut, Shield } from 'lucide-react';
+import { LogOut, Shield } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { role, setRole } = useSIM();
@@ -21,7 +21,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         />
                         <div>
                             <h1 className="font-bold text-xl text-slate-900 leading-tight tracking-tight">
-                                خطوط البصرة و اللؤلؤة
+                                خطوط AGC
                             </h1>
                             <p className="text-xs text-slate-500 font-bold">
                                 {role === 'admin' ? 'لوحة تحكم المسؤول' : role === 'viewer' ? 'وضع القراءة فقط' : 'بوابة الموظفين'}

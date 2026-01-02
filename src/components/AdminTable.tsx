@@ -196,15 +196,20 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-slate-800">إدارة الخطوط</h2>
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4">
+                    <h2 className="text-xl font-bold text-slate-800 whitespace-nowrap">إدارة الخطوط</h2>
+
+                    {/* Mobile Search - Only visible on small screens if we want to move it, 
+                        but let's just make the whole layout stacked on small screens */}
+                </div>
 
                 {/* Search Box */}
-                <div className="flex-1 max-w-sm mx-4 relative">
+                <div className="flex-1 w-full lg:max-w-sm relative order-2 lg:order-none">
                     <input
                         type="text"
                         placeholder="بحث بالاسم أو الرقم..."
-                        className="w-full pl-4 pr-10 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                        className="w-full pl-4 pr-10 py-3 lg:py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm shadow-sm"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -214,7 +219,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                 </div>
 
                 {role === 'admin' && (
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap items-center gap-2 lg:gap-3 order-3 lg:order-none">
                         <button
                             onClick={() => {
                                 const headers = ['اسم الموظف,رقم الهاتف,العنوان الوظيفي,موقع العمل,مبلغ الباقة,تاريخ الانتهاء,الرصيد المقدم,الحالة'];
@@ -229,7 +234,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                                     c.status
                                 ].join(','));
 
-                                const csvContent = '\uFEFF' + [headers, ...rows].join('\n'); // Add BOM for Excel Arabic support
+                                const csvContent = '\uFEFF' + [headers, ...rows].join('\n'); // Add BOM for Arabic
                                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                                 const url = URL.createObjectURL(blob);
                                 const link = document.createElement('a');
@@ -239,13 +244,13 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                                 link.click();
                                 document.body.removeChild(link);
                             }}
-                            className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
+                            className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl transition-colors shadow-sm text-sm"
                         >
                             <Upload className="w-4 h-4 rotate-180" />
                             <span>تصدير CSV</span>
                         </button>
 
-                        <div className="relative">
+                        <div className="flex-1 lg:flex-none relative">
                             <input
                                 type="file"
                                 accept=".csv"
@@ -253,7 +258,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
                             <button
-                                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
+                                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl transition-colors shadow-sm text-sm"
                             >
                                 <Upload className="w-4 h-4" />
                                 <span>استيراد CSV</span>
@@ -261,7 +266,7 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                         </div>
                         <button
                             onClick={() => setIsAdding(true)}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
+                            className="w-full lg:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl transition-colors shadow-sm text-sm font-bold"
                         >
                             <Plus className="w-4 h-4" />
                             <span>إضافة خط جديد</span>
