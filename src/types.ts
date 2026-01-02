@@ -1,4 +1,4 @@
-export type UserRole = 'guest' | 'admin';
+export type UserRole = 'guest' | 'admin' | 'viewer';
 
 export interface SIMCard {
   id: string;

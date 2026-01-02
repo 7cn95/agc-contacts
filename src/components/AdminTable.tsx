@@ -8,7 +8,7 @@ interface AdminTableProps {
 }
 
 export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
-    const { simCards, deleteSIMCard, renewSIMCard, updateSIMCard, addSIMCard, importSIMCards } = useSIM();
+    const { simCards, deleteSIMCard, renewSIMCard, updateSIMCard, addSIMCard, importSIMCards, role } = useSIM();
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editFormData, setEditFormData] = useState<Partial<SIMCard>>({});
     const [searchTerm, setSearchTerm] = useState('');
@@ -413,34 +413,38 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isExpired ? 'bg-red-100 text-red-800' :
-                                                    isExpiredToday ? 'bg-amber-100 text-amber-800 ring-2 ring-red-400' :
-                                                        'bg-green-100 text-green-800'
+                                                isExpiredToday ? 'bg-amber-100 text-amber-800 ring-2 ring-red-400' :
+                                                    'bg-green-100 text-green-800'
                                                 }`}>
                                                 {isExpired ? 'منتهي' : isExpiredToday ? 'منتهي اليوم' : 'فعال'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                            {isEditing ? (
-                                                <div className="flex justify-center gap-3">
-                                                    <button onClick={() => handleSave(card.id)} className="text-green-600 hover:text-green-900"><Save className="w-5 h-5" /></button>
-                                                    <button onClick={() => setEditingId(null)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
-                                                </div>
+                                            {role === 'admin' ? (
+                                                isEditing ? (
+                                                    <div className="flex justify-center gap-3">
+                                                        <button onClick={() => handleSave(card.id)} className="text-green-600 hover:text-green-900"><Save className="w-5 h-5" /></button>
+                                                        <button onClick={() => setEditingId(null)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex justify-center gap-3">
+                                                        <button
+                                                            onClick={() => openRenewModal(card)}
+                                                            className="text-indigo-600 hover:text-indigo-900 tooltip"
+                                                            title="تجديد الاشتراك"
+                                                        >
+                                                            <RefreshCw className="w-5 h-5" />
+                                                        </button>
+                                                        <button onClick={() => handleEditClick(card)} className="text-slate-400 hover:text-slate-600">
+                                                            <Edit2 className="w-5 h-5" />
+                                                        </button>
+                                                        <button onClick={() => deleteSIMCard(card.id)} className="text-red-400 hover:text-red-600">
+                                                            <Trash2 className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
+                                                )
                                             ) : (
-                                                <div className="flex justify-center gap-3">
-                                                    <button
-                                                        onClick={() => openRenewModal(card)}
-                                                        className="text-indigo-600 hover:text-indigo-900 tooltip"
-                                                        title="تجديد الاشتراك"
-                                                    >
-                                                        <RefreshCw className="w-5 h-5" />
-                                                    </button>
-                                                    <button onClick={() => handleEditClick(card)} className="text-slate-400 hover:text-slate-600">
-                                                        <Edit2 className="w-5 h-5" />
-                                                    </button>
-                                                    <button onClick={() => deleteSIMCard(card.id)} className="text-red-400 hover:text-red-600">
-                                                        <Trash2 className="w-5 h-5" />
-                                                    </button>
-                                                </div>
+                                                <span className="text-slate-300">-</span>
                                             )}
                                         </td>
                                     </tr>

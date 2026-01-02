@@ -14,7 +14,7 @@ function AppContent() {
 
   return (
     <Layout>
-      {role === 'admin' ? (
+      {(role === 'admin' || role === 'viewer') ? (
         <div className="space-y-6 animate-fade-in">
           {/* Admin Tabs */}
           <div className="flex gap-4 border-b border-slate-200 mb-6 sticky top-0 bg-slate-50 z-30 pt-2">

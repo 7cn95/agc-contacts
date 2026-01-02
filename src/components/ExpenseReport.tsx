@@ -3,7 +3,7 @@ import { useSIM } from '../context/SIMContext';
 import { FileText, Download, Printer, Wallet, Plus, TrendingDown, TrendingUp, AlertCircle, X, Save } from 'lucide-react';
 
 export const ExpenseReport: React.FC = () => {
-    const { renewalHistory, walletDeposits, externalExpenses, addDeposit, addExternalExpense, simCards } = useSIM();
+    const { renewalHistory, walletDeposits, externalExpenses, addDeposit, addExternalExpense, simCards, role } = useSIM();
 
     // Modals State
     const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
@@ -154,34 +154,39 @@ export const ExpenseReport: React.FC = () => {
                         </h2>
                         <p className="text-sm text-slate-500 mt-1">تتبع الميزانية وحالة التجديدات والمصاريف</p>
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setIsAddExpenseOpen(true)}
-                            className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl transition-colors shadow-sm"
-                        >
-                            <TrendingDown className="w-4 h-4" />
-                            <span>تسجيل مصروف</span>
-                        </button>
-                        <button
-                            onClick={() => setIsAddFundsOpen(true)}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
-                        >
-                            <Plus className="w-4 h-4" />
-                            <span>إضافة رصيد</span>
-                        </button>
-                    </div>
+                    {role === 'admin' && (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setIsAddExpenseOpen(true)}
+                                className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl transition-colors shadow-sm"
+                            >
+                                <TrendingDown className="w-4 h-4" />
+                                <span>تسجيل مصروف</span>
+                            </button>
+                            <button
+                                onClick={() => setIsAddFundsOpen(true)}
+                                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
+                            >
+                                <Plus className="w-4 h-4" />
+                                <span>إضافة رصيد</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {/* Current Balance */}
-                    <div className="bg-indigo-50 p-5 rounded-xl border border-indigo-100 relative group cursor-pointer" onClick={openEditBalance}>
+                    <div
+                        className={`p-5 rounded-xl border relative group ${role === 'admin' ? 'bg-indigo-50 border-indigo-100 cursor-pointer shadow-sm' : 'bg-slate-50 border-slate-100'}`}
+                        onClick={() => role === 'admin' && openEditBalance()}
+                    >
                         <div className="flex justify-between items-start mb-2">
-                            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">الرصيد الحالي</p>
-                            <Wallet className="w-4 h-4 text-indigo-400" />
+                            <p className={`text-xs font-bold uppercase tracking-wider ${role === 'admin' ? 'text-indigo-600' : 'text-slate-500'}`}>الرصيد الحالي</p>
+                            <Wallet className={`w-4 h-4 ${role === 'admin' ? 'text-indigo-400' : 'text-slate-400'}`} />
                         </div>
                         <div className="flex items-center gap-2">
-                            <p className="text-2xl font-bold text-indigo-900" dir="ltr">{currentBalance.toLocaleString()} <span className="text-sm font-normal text-indigo-500">IQD</span></p>
-                            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded">تعديل</span>
+                            <p className={`text-2xl font-bold ${role === 'admin' ? 'text-indigo-900' : 'text-slate-900'}`} dir="ltr">{currentBalance.toLocaleString()} <span className="text-sm font-normal opacity-60">IQD</span></p>
+                            {role === 'admin' && <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded">تعديل</span>}
                         </div>
                         <div className="mt-2 text-xs text-indigo-600 flex items-center gap-1">
                             <TrendingUp className="w-3 h-3" />
