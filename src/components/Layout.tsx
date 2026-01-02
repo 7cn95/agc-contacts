@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSIM } from '../context/SIMContext';
 import { LoginModal } from './LoginModal';
+import logo from '../assets/logo.png';
 import { Smartphone, LogOut, Shield } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -11,17 +12,19 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <div dir="rtl" className="min-h-screen bg-slate-50 flex flex-col font-cairo">
             {/* Navbar */}
             <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-xl ${role === 'admin' ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                            <Smartphone className="w-6 h-6" />
-                        </div>
+                <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <img
+                            src={logo}
+                            alt="AGC Logo"
+                            className="w-14 h-14 object-contain rounded-xl shadow-sm border border-slate-100"
+                        />
                         <div>
-                            <h1 className="font-bold text-lg text-slate-900 leading-tight">
-                                خطوط AGC
+                            <h1 className="font-bold text-xl text-slate-900 leading-tight tracking-tight">
+                                خطوط البصرة و اللؤلؤة
                             </h1>
-                            <p className="text-xs text-slate-500 font-medium">
-                                {role === 'admin' ? 'لوحة تحكم المسؤول' : 'بوابة الموظفين'}
+                            <p className="text-xs text-slate-500 font-bold">
+                                {role === 'admin' ? 'لوحة تحكم المسؤول' : role === 'viewer' ? 'وضع القراءة فقط' : 'بوابة الموظفين'}
                             </p>
                         </div>
                     </div>
