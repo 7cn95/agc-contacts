@@ -10,6 +10,7 @@ export const GuestTable: React.FC = () => {
         const dateStr = card.expirationDate ? new Date(card.expirationDate).toLocaleDateString('ar-IQ') : '';
         return card.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (card.jobTitle || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (card.workLocation || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             dateStr.includes(searchTerm) ||
             card.phoneNumber.includes(searchTerm);
     });
@@ -24,7 +25,7 @@ export const GuestTable: React.FC = () => {
                 <input
                     type="text"
                     className="block w-full pr-10 pl-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm transition-all"
-                    placeholder="بحث باسم الموظف أو العنوان الوظيفي..."
+                    placeholder="بحث باسم الموظف، العنوان الوظيفي، أو موقع العمل..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
