@@ -16,12 +16,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (pin === '1234') {
+        if (pin === '0099') {
             setRole('admin');
             onClose();
             setPin('');
             setError(false);
-        } else if (pin === '5678') { // Added Viewer PIN
+        } else if (pin === '1234') { // Updated Viewer PIN
             setRole('viewer');
             onClose();
             setPin('');
