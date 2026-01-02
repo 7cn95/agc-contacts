@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useSIM } from '../context/SIMContext';
 import { LoginModal } from './LoginModal';
-import logo from '../assets/logo.png';
 import { LogOut, Shield } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -15,7 +14,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <img
-                            src={logo}
+                            src="/logo.svg"
                             alt="AGC Logo"
                             className="w-14 h-14 object-contain rounded-full shadow-sm"
                         />
