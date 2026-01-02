@@ -6,10 +6,13 @@ export const GuestTable: React.FC = () => {
     const { simCards } = useSIM();
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredCards = simCards.filter((card) =>
-        card.employeeName.includes(searchTerm) ||
-        card.jobTitle.includes(searchTerm)
-    );
+    const filteredCards = simCards.filter((card) => {
+        const dateStr = card.expirationDate ? new Date(card.expirationDate).toLocaleDateString('ar-IQ') : '';
+        return card.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (card.jobTitle || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            dateStr.includes(searchTerm) ||
+            card.phoneNumber.includes(searchTerm);
+    });
 
     return (
         <div className="space-y-6">
@@ -45,7 +48,7 @@ export const GuestTable: React.FC = () => {
                                 </p>
                             </div>
                             <a
-                                href={`tel:${card.phoneNumber}`}
+                                href={`tel:0${card.phoneNumber}`}
                                 className="p-2 bg-emerald-50 text-emerald-600 rounded-full hover:bg-emerald-100 transition-colors"
                                 aria-label="Call"
                             >
@@ -109,7 +112,7 @@ export const GuestTable: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <a
-                                            href={`tel:${card.phoneNumber}`}
+                                            href={`tel:0${card.phoneNumber}`}
                                             className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-900 font-bold px-3 py-1 rounded-md hover:bg-emerald-50 transition-colors"
                                         >
                                             <Phone className="w-4 h-4" />

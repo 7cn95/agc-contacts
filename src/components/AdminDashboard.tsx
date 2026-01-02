@@ -3,21 +3,38 @@ import { useSIM } from '../context/SIMContext';
 import { DollarSign, AlertTriangle, CheckCircle, Activity } from 'lucide-react';
 
 export interface AdminDashboardProps {
-    onFilterSelect: (status: 'all' | 'active' | 'expired' | 'expiring_soon') => void;
-    activeFilter: 'all' | 'active' | 'expired' | 'expiring_soon';
+    onFilterSelect: (status: 'all' | 'active' | 'expired' | 'expiring_soon' | 'expired_today') => void;
+    activeFilter: 'all' | 'active' | 'expired' | 'expiring_soon' | 'expired_today';
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onFilterSelect, activeFilter }) => {
     const { simCards } = useSIM();
 
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
     const totalCost = simCards.reduce((acc, card) => acc + (card.billAmount || 0), 0);
+
     const expiringSoon = simCards.filter((card) => {
         if (!card.expirationDate) return false;
-        const days = (new Date(card.expirationDate).getTime() - Date.now()) / (1000 * 3600 * 24);
-        return days <= 3 && days >= 0;
+        const days = (new Date(card.expirationDate).getTime() - now.getTime()) / (1000 * 3600 * 24);
+        return days <= 3 && days > 0;
     }).length;
-    const expired = simCards.filter(c => c.status === 'Expired').length;
-    const active = simCards.filter(c => c.status === 'Active').length;
+
+    const expiredToday = simCards.filter(c => {
+        if (!c.expirationDate) return false;
+        return c.expirationDate.split('T')[0] === todayStr;
+    }).length;
+
+    const expired = simCards.filter(c => {
+        if (!c.expirationDate) return c.status === 'Expired';
+        return new Date(c.expirationDate) < now && c.expirationDate.split('T')[0] !== todayStr;
+    }).length;
+
+    const active = simCards.filter(c => {
+        if (!c.expirationDate) return c.status === 'Active';
+        return new Date(c.expirationDate) >= now || c.expirationDate.split('T')[0] === todayStr;
+    }).length;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -34,6 +51,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onFilterSelect, 
                 </div>
                 <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
                     <DollarSign className="w-6 h-6" />
+                </div>
+            </div>
+
+            {/* Expired Today */}
+            <div
+                onClick={() => onFilterSelect('expired_today')}
+                className={`bg-white p-6 rounded-2xl shadow-sm border cursor-pointer hover:bg-red-50/50 transition-all flex items-center justify-between ${activeFilter === 'expired_today' ? 'ring-2 ring-red-500 border-transparent' : (expiredToday > 0 ? 'border-red-200 ring-4 ring-red-50' : 'border-slate-100')}`}
+            >
+                <div>
+                    <p className="text-sm font-medium text-slate-500">انتهت اليوم</p>
+                    <p className={`text-2xl font-bold mt-1 ${expiredToday > 0 ? 'text-red-600' : 'text-slate-800'}`}>
+                        {expiredToday}
+                    </p>
+                </div>
+                <div className={`p-3 rounded-xl ${expiredToday > 0 ? 'bg-red-100 text-red-600' : 'bg-slate-50 text-slate-400'}`}>
+                    <Activity className="w-6 h-6" />
                 </div>
             </div>
 

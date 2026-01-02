@@ -9,7 +9,7 @@ import { ExpenseReport } from './components/ExpenseReport';
 function AppContent() {
   const { role } = useSIM();
 
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'expired' | 'expiring_soon'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'expired' | 'expiring_soon' | 'expired_today'>('all');
   const [adminView, setAdminView] = useState<'dashboard' | 'reports'>('dashboard');
 
   return (

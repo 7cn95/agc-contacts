@@ -4,7 +4,7 @@ import { Edit2, Trash2, RefreshCw, Plus, Save, X, Upload } from 'lucide-react';
 import type { SIMCard } from '../types';
 
 interface AdminTableProps {
-    filterStatus: 'all' | 'active' | 'expired' | 'expiring_soon';
+    filterStatus: 'all' | 'active' | 'expired' | 'expiring_soon' | 'expired_today';
 }
 
 export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
@@ -13,24 +13,44 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
     const [editFormData, setEditFormData] = useState<Partial<SIMCard>>({});
     const [searchTerm, setSearchTerm] = useState('');
 
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
     // Filter Logic
     const filteredSimCards = simCards.filter(card => {
+        // Calculate Dynamic Status (Display only as requested)
+        const getDynamicStatus = () => {
+            if (!card.expirationDate) return card.status;
+            const cardDateStr = card.expirationDate.split('T')[0];
+            const cardDate = new Date(card.expirationDate);
+
+            if (cardDateStr === todayStr) return 'Expired Today';
+            if (cardDate < now) return 'Expired';
+            return 'Active';
+        };
+
+        const currentStatus = getDynamicStatus();
+
         // Status Filter
         const matchesStatus = () => {
             if (filterStatus === 'all') return true;
-            if (filterStatus === 'active') return card.status === 'Active';
-            if (filterStatus === 'expired') return card.status === 'Expired';
+            if (filterStatus === 'active') return currentStatus === 'Active' || currentStatus === 'Expired Today';
+            if (filterStatus === 'expired') return currentStatus === 'Expired';
+            if (filterStatus === 'expired_today') return currentStatus === 'Expired Today';
             if (filterStatus === 'expiring_soon') {
                 if (!card.expirationDate) return false;
-                const days = (new Date(card.expirationDate).getTime() - Date.now()) / (1000 * 3600 * 24);
-                return days <= 3 && days >= 0;
+                const days = (new Date(card.expirationDate).getTime() - now.getTime()) / (1000 * 3600 * 24);
+                return days <= 3 && days > 0;
             }
             return true;
         };
 
-        // Search Filter
-        const matchesSearch = card.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            card.phoneNumber.includes(searchTerm);
+        // Search Filter (Includes Date)
+        const dateStr = card.expirationDate ? new Date(card.expirationDate).toLocaleDateString('ar-IQ') : '';
+        const matchesSearch =
+            card.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            card.phoneNumber.includes(searchTerm) ||
+            dateStr.includes(searchTerm);
 
         return matchesStatus() && matchesSearch;
     });
@@ -326,7 +346,20 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                             {/* Data Rows */}
                             {filteredSimCards.map((card) => {
                                 const isEditing = editingId === card.id;
-                                const isExpired = card.status === 'Expired';
+
+                                // Calculate Dynamic Status for UI
+                                const getDynamicStatus = () => {
+                                    if (!card.expirationDate) return card.status;
+                                    const cardDateStr = card.expirationDate.split('T')[0];
+                                    const cardDate = new Date(card.expirationDate);
+                                    if (cardDateStr === todayStr) return 'Expired Today';
+                                    if (cardDate < now) return 'Expired';
+                                    return 'Active';
+                                };
+
+                                const currentStatus = getDynamicStatus();
+                                const isExpired = currentStatus === 'Expired';
+                                const isExpiredToday = currentStatus === 'Expired Today';
                                 const hasCredit = (card.creditBalance || 0) > 0;
 
                                 return (
@@ -379,9 +412,11 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isExpired ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isExpired ? 'bg-red-100 text-red-800' :
+                                                    isExpiredToday ? 'bg-amber-100 text-amber-800 ring-2 ring-red-400' :
+                                                        'bg-green-100 text-green-800'
                                                 }`}>
-                                                {isExpired ? 'منتهي' : 'فعال'}
+                                                {isExpired ? 'منتهي' : isExpiredToday ? 'منتهي اليوم' : 'فعال'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
