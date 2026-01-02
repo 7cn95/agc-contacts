@@ -21,7 +21,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             onClose();
             setPin('');
             setError(false);
-        } else if (pin === '1234') { // Updated Viewer PIN
+        } else if (pin === '1212') { // Updated Viewer PIN
             setRole('viewer');
             onClose();
             setPin('');
