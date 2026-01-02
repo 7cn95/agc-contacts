@@ -17,7 +17,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         <img
                             src={logo}
                             alt="AGC Logo"
-                            className="w-14 h-14 object-contain rounded-xl shadow-sm border border-slate-100"
+                            className="w-14 h-14 object-contain rounded-full shadow-sm"
                         />
                         <div>
                             <h1 className="font-bold text-xl text-slate-900 leading-tight tracking-tight">
