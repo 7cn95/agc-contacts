@@ -89,29 +89,63 @@ export const SIMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const addSIMCard = async (card: Omit<SIMCard, 'id'>) => {
-        const { data, error } = await supabase.from('sim_cards').insert([card]).select().single();
+        const dbCard = {
+            employeeName: card.employeeName,
+            phoneNumber: card.phoneNumber,
+            position: card.jobTitle,
+            department: card.workLocation,
+            billAmount: card.billAmount,
+            expirationDate: card.expirationDate,
+            status: card.status,
+            creditBalance: card.creditBalance || 0
+        };
+
+        const { data, error } = await supabase.from('sim_cards').insert([dbCard]).select().single();
         if (error) {
             console.error('Error adding SIM card:', error);
+            alert('خطأ في إضافة الخط: ' + error.message);
             return;
         }
-        if (data) setSimCards(prev => [...prev, data]);
+        if (data) {
+            const mappedNewCard: SIMCard = {
+                id: data.id,
+                employeeName: data.employeeName,
+                phoneNumber: data.phoneNumber,
+                jobTitle: data.position,
+                workLocation: data.department,
+                billAmount: data.billAmount,
+                status: data.status,
+                expirationDate: data.expirationDate,
+                renewalFlag: false,
+                creditBalance: data.creditBalance
+            };
+            setSimCards(prev => [...prev, mappedNewCard]);
+        }
     };
 
     const updateSIMCard = async (id: string, updates: Partial<SIMCard>) => {
         // Optimistic update for UI responsiveness
         setSimCards(prev => prev.map(card => card.id === id ? { ...card, ...updates } : card));
 
-        // Auto-update status logic if needed (handled in backend or just update object)
-        const finalUpdates = { ...updates };
+        // Map frontend fields to DB columns
+        const dbUpdates: any = {};
+        if (updates.employeeName) dbUpdates.employeeName = updates.employeeName;
+        if (updates.phoneNumber) dbUpdates.phoneNumber = updates.phoneNumber;
+        if (updates.jobTitle) dbUpdates.position = updates.jobTitle;
+        if (updates.workLocation) dbUpdates.department = updates.workLocation;
+        if (updates.billAmount !== undefined) dbUpdates.billAmount = updates.billAmount;
         if (updates.expirationDate) {
+            dbUpdates.expirationDate = updates.expirationDate;
             const isExpired = new Date(updates.expirationDate) < new Date();
-            finalUpdates.status = isExpired ? 'Expired' : 'Active';
+            dbUpdates.status = isExpired ? 'Expired' : 'Active';
         }
+        if (updates.status) dbUpdates.status = updates.status;
+        if (updates.creditBalance !== undefined) dbUpdates.creditBalance = updates.creditBalance;
 
-        const { error } = await supabase.from('sim_cards').update(finalUpdates).eq('id', id);
+        const { error } = await supabase.from('sim_cards').update(dbUpdates).eq('id', id);
         if (error) {
             console.error('Error updating SIM card:', error);
-            // Revert would go here, but focusing on simple happy path
+            alert('خطأ في التحديث: ' + error.message);
         }
     };
 
