@@ -213,59 +213,61 @@ export const AdminTable: React.FC<AdminTableProps> = ({ filterStatus }) => {
                     </div>
                 </div>
 
-                <div className="flex gap-3">
-                    <button
-                        onClick={() => {
-                            const headers = ['اسم الموظف,رقم الهاتف,العنوان الوظيفي,موقع العمل,مبلغ الباقة,تاريخ الانتهاء,الرصيد المقدم,الحالة'];
-                            const rows = simCards.map(c => [
-                                c.employeeName,
-                                c.phoneNumber,
-                                c.jobTitle || '',
-                                c.workLocation || '',
-                                c.billAmount || 0,
-                                c.expirationDate ? new Date(c.expirationDate).toLocaleDateString('en-CA') : '',
-                                c.creditBalance || 0,
-                                c.status
-                            ].join(','));
-
-                            const csvContent = '\uFEFF' + [headers, ...rows].join('\n'); // Add BOM for Excel Arabic support
-                            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                            const url = URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.setAttribute('download', 'sim_cards_export.csv');
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        }}
-                        className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
-                    >
-                        <Upload className="w-4 h-4 rotate-180" />
-                        <span>تصدير CSV</span>
-                    </button>
-
-                    <div className="relative">
-                        <input
-                            type="file"
-                            accept=".csv"
-                            onChange={handleFileUpload}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        />
+                {role === 'admin' && (
+                    <div className="flex gap-3">
                         <button
-                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
+                            onClick={() => {
+                                const headers = ['اسم الموظف,رقم الهاتف,العنوان الوظيفي,موقع العمل,مبلغ الباقة,تاريخ الانتهاء,الرصيد المقدم,الحالة'];
+                                const rows = simCards.map(c => [
+                                    c.employeeName,
+                                    c.phoneNumber,
+                                    c.jobTitle || '',
+                                    c.workLocation || '',
+                                    c.billAmount || 0,
+                                    c.expirationDate ? new Date(c.expirationDate).toLocaleDateString('en-CA') : '',
+                                    c.creditBalance || 0,
+                                    c.status
+                                ].join(','));
+
+                                const csvContent = '\uFEFF' + [headers, ...rows].join('\n'); // Add BOM for Excel Arabic support
+                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                const url = URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.setAttribute('download', 'sim_cards_export.csv');
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }}
+                            className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
                         >
-                            <Upload className="w-4 h-4" />
-                            <span>استيراد CSV</span>
+                            <Upload className="w-4 h-4 rotate-180" />
+                            <span>تصدير CSV</span>
+                        </button>
+
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleFileUpload}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                            <button
+                                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
+                            >
+                                <Upload className="w-4 h-4" />
+                                <span>استيراد CSV</span>
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => setIsAdding(true)}
+                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
+                        >
+                            <Plus className="w-4 h-4" />
+                            <span>إضافة خط جديد</span>
                         </button>
                     </div>
-                    <button
-                        onClick={() => setIsAdding(true)}
-                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
-                    >
-                        <Plus className="w-4 h-4" />
-                        <span>إضافة خط جديد</span>
-                    </button>
-                </div>
+                )}
             </div>
 
             {/* Renewal Modal */}
