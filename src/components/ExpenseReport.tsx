@@ -142,6 +142,27 @@ export const ExpenseReport: React.FC = () => {
         window.print();
     };
 
+    const handleExportExcel = () => {
+        const headers = ['التاريخ,نوع العملية,التفاصيل,ملاحظات / رقم هاتف,المبلغ'];
+        const rows = filteredTransactions.map(record => [
+            new Date(record.date).toLocaleDateString('en-CA'),
+            record.isRenewal ? 'تجديد اشتراك' : 'مصروف خارجي',
+            record.title,
+            record.details.replace(/,/g, ' '),
+            record.amount
+        ].join(','));
+
+        const csvContent = '\uFEFF' + [headers, ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `تقرير_المصاريف_${startDate}_to_${endDate}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Wallet Overview Section */}
@@ -383,7 +404,10 @@ export const ExpenseReport: React.FC = () => {
                             <Printer className="w-4 h-4" />
                             <span>طباعة</span>
                         </button>
-                        <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm">
+                        <button
+                            onClick={handleExportExcel}
+                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition-colors shadow-sm"
+                        >
                             <Download className="w-4 h-4" />
                             <span>Excel</span>
                         </button>
